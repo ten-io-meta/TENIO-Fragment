@@ -30,6 +30,8 @@ jobs:
         run: npx hardhat test --config audit/hardhat.audit.config.cjs
       - name: Compare compiled runtime byte-for-byte with Mainnet and Sepolia
         run: node audit/compare-deployments.cjs
+      - name: Read-only minted token and funding inventory on both chains
+        run: node audit/inventory-live-token-state.cjs
       - name: Upload complete source-to-chain evidence even on mismatch
         if: always()
         uses: actions/upload-artifact@v4
