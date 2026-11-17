@@ -34,7 +34,7 @@
 - Read-only snapshot: Mainnet had `tokenIds() = 0`, no live NFTs and 0 ETH. Sepolia had 17 minted historical IDs, **live #14 and #15**, with 0.54 **test** ETH vs 0.20 expected for those two NFTs **at the inspected block**.
 - Reported ETH margin on Sepolia **is not a protected surplus** because `withdraw()` can drain it.
 - Onchain observations are historical point-in-time public-RPC reads, not a complete event-history investigation or a future solvency proof.
-- Scripts include a further read-only `owner()` query to identify the administrator currently authorized to withdraw. **A README's claimed owner must not be mistaken for a current onchain access-control check.**
+- Direct `owner()` observations on **both chains** identify the current `onlyOwner` withdrawal administrator as `0x75DA787FDA32092079dbe113c5c9DBC22CBBC455` (Mainnet block **26,437,931**, Sepolia block **12,157,527**). This is an actual read-only onchain access-control check, separate from the owners of NFTs.
 
 ## Security findings and merge gates
 
