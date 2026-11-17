@@ -11,6 +11,7 @@ const entries = [
     address: "0xD360714b72796dC812A0c177B9Be45022D1f3f5B" }
 ];
 const iface = new ethers.Interface([
+  "function owner() view returns (address)",
   "function tokenIds() view returns (uint256)",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function supportsInterface(bytes4) view returns (bool)"
@@ -48,6 +49,9 @@ async function view(entry, signature, args, block) {
       out.block = head;
       out.blockHash = header?.hash || null;
       out.balanceWei = BigInt(await rpc(entry.rpc, "eth_getBalance", [entry.address, tag])).toString();
+      // The Ownable administrator controlling withdraw() is distinct from
+      // the owners of individual NFTs; never infer it from the README.
+      out.currentWithdrawalAdmin = await view(entry, "owner()", [], tag);
       const minted = await view(entry, "tokenIds()", [], tag);
       out.mintedCounter = minted.toString();
       const maximum = minted > 30n ? 30n : minted;
@@ -68,7 +72,7 @@ async function view(entry, signature, args, block) {
         (BigInt(out.liveFound) * 100000000000000000n).toString();
       out.observedBalanceCoversScannedTokens =
         BigInt(out.balanceWei) >= BigInt(out.minimumExpectedBackingForObservedLiveTokensWei);
-      out.caveat = "Expected economic redemption is inferred from repository source; the contract lacks a per-token enforceable backing register. A revert of ownerOf may mean token burned or never minted. This is a snapshot.";
+      out.caveat = "Expected economic redemption is inferred from matched executable code; the contract lacks a per-token enforceable backing register. Contract owner() identifies the current onlyOwner withdrawal administrator, distinct from ERC721 token owners. This is a snapshot and does not establish historical actions or future solvency.";
     } catch(e) {
       unavailable = true;
       out.status = "UNAVAILABLE";
