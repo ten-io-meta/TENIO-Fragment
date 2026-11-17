@@ -15,6 +15,7 @@ jobs:
     env:
       AUDIT_OPTIMIZER: "true"
       AUDIT_RUNS: "200"
+      AUDIT_EVM_VERSION: "cancun"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
