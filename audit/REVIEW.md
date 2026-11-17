@@ -41,6 +41,9 @@ Read-only token inventory: `audit/inventory-live-token-state.cjs`, current outpu
 | Contract ETH | **0** | **0.54 test ETH** |
 | Hypothetical 0.10 ETH each for observed live NFTs | **0** | **0.20 test ETH** |
 | Difference between balance and hypothetical backing | **0** | **0.34 test ETH** |
+| Onchain `owner()` authorized for `withdraw()` (independent later snapshot) | `0x75DA787FDA32092079dbe113c5c9DBC22CBBC455` | `0x75DA787FDA32092079dbe113c5c9DBC22CBBC455` |
+
+**Owner-control verification:** the contract administrator was read directly using `owner()` on Mainnet block 26,437,931 and Sepolia block 12,157,527. This is the address with current authority to call `withdraw()`, not a proof that it ever did so. This admin observation is separate from the older mint/balance snapshots in the table.
 
 **Interpretation:** The studied Mainnet instance has no minted IDs or observed active NFT redemptions at the pinned block. Sepolia holds enough *test* ETH to pay 0.10 ETH to both existing token owners **at that snapshot**, but the owner can still drain all ETH at any time; this is not a protected balance. Balances and token states can change after the recorded blocks. The `0.34` difference is a **mathematical margin**, not protected withdrawal surplus nor proof of a trustless guarantee. The inventory uses one RPC for per-token ownerOf reads; the codehash and balance had independent dual-RPC corroboration in the runtime comparison.
 
