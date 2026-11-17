@@ -1,6 +1,17 @@
 # 🧱 TENIO-Fragment
 
-Este repositorio contiene el contrato oficial `TENIO-Fragment`, desplegado en Ethereum Mainnet, con ETH embebido y sistema de quema reversible.
+> **AVISO DE SEGURIDAD — CONTRATO HISTÓRICO, NO REFERENCIA ERC-8060 ESTRICTA (auditoría experimental, noviembre de 2026).**
+> El contrato `TENIOFragment.sol` no implementa la interfaz `IERC721Value` del borrador ERC-8060.
+> El propietario de la colección puede ejecutar `withdraw()` y retirar todo el saldo
+> incluso si siguen existiendo NFTs. Si después se ejecuta `burn(tokenId)` con saldo
+> inferior a 0,10 ETH, el NFT puede destruirse **sin pagar el ETH esperado**.
+> Se ha reproducido en pruebas locales y las instrucciones EVM del código compilado
+> coinciden exactamente con las desplegadas en Ethereum Mainnet y Sepolia, excluyendo
+> los metadatos del compilador. **No utilizar este despliegue como garantía económica
+> sin una evaluación de riesgo independiente; modificar GitHub NO modifica contratos desplegados.**
+> Véase [informe de investigación](audit/REVIEW.md) y [PR de análisis](https://github.com/ten-io-meta/TENIO-Fragment/pull/3).
+
+Este repositorio conserva el contrato histórico `TENIO-Fragment`, desplegado en Ethereum Mainnet, con una lógica de quema y reembolso de ETH **condicionado al saldo**. La quema destruye el NFT de forma irreversible; no es un mecanismo reversible ni garantiza el pago cuando el contrato está insuficientemente financiado.
 
 ---
 
@@ -43,6 +54,8 @@ Para validación pública y testeo sin ETH real:
 ## 🔁 Fork origin
 
 > “This contract is a fork of [TEN.IO](https://ten.io), the first NFT contract signed on Ethereum Mainnet with embedded ETH collateral and reversible burn.”
+>
+> *Nota de revisión (2026): «reversible burn» es una expresión del texto histórico. No implica que un NFT quemado pueda recuperarse ni que exista una garantía incondicional de pago.*
 
 ---
 
