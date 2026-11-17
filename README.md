@@ -1,5 +1,16 @@
 # 🧱 TENIO-Fragment
 
+> **AVISO DE SEGURIDAD — CONTRATO HISTÓRICO, NO REFERENCIA ERC-8060 ESTRICTA (auditoría experimental, noviembre de 2026).**
+> El contrato `TENIOFragment.sol` no implementa la interfaz `IERC721Value` del borrador ERC-8060.
+> El propietario de la colección puede ejecutar `withdraw()` y retirar todo el saldo
+> incluso si siguen existiendo NFTs. Si después se ejecuta `burn(tokenId)` con saldo
+> inferior a 0,10 ETH, el NFT puede destruirse **sin pagar el ETH esperado**.
+> Se ha reproducido en pruebas locales y las instrucciones EVM del código compilado
+> coinciden exactamente con las desplegadas en Ethereum Mainnet y Sepolia, excluyendo
+> los metadatos del compilador. **No utilizar este despliegue como garantía económica
+> sin una evaluación de riesgo independiente; modificar GitHub NO modifica contratos desplegados.**
+> Véase [informe de investigación](audit/REVIEW.md) y [PR de análisis](https://github.com/ten-io-meta/TENIO-Fragment/pull/3).
+
 Este repositorio contiene el contrato oficial `TENIO-Fragment`, desplegado en Ethereum Mainnet, con ETH embebido y sistema de quema reversible.
 
 ---
