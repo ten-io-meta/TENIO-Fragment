@@ -25,7 +25,14 @@ const networks = [
     chain: 11155111,
     name: "Sepolia",
     address: "0xD360714b72796dC812A0c177B9Be45022D1f3f5B",
-    providers: ["https://ethereum-sepolia-rpc.publicnode.com", "https://1rpc.io/sepolia"]
+    providers: [
+      "https://ethereum-sepolia-rpc.publicnode.com",
+      "https://1rpc.io/sepolia",
+      "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
+      "https://sepolia.gateway.tenderly.co",
+      "https://rpc.sepolia.org",
+      "https://rpc2.sepolia.org"
+    ]
   }
 ];
 
@@ -115,8 +122,11 @@ const result = {
     const height = Math.min(...available.map(x => x.head)) - 3;
     const blockTag = "0x" + height.toString(16);
     const observations = [];
+    const providerErrors = [];
+    const distinctObservedEndpoints = new Set();
 
     for (const node of available) {
+      if (distinctObservedEndpoints.has(node.url)) continue;
       try {
         const code = (await rpc(node.url, "eth_getCode", [net.address, blockTag])).toLowerCase();
         const head = await rpc(node.url, "eth_getBlockByNumber", [blockTag, false]);
@@ -132,8 +142,10 @@ const result = {
           cborLength: code.length > 6 ? parseInt(code.slice(-4), 16) : null
         };
         observations.push(obs);
+        distinctObservedEndpoints.add(node.url);
+        if (observations.length >= 2) break; // two distinct successful RPCs
       } catch (e) {
-        observations.push({ endpoint: node.url, error: String(e.message || e) });
+        providerErrors.push({ endpoint: node.url, error: String(e.message || e) });
       }
     }
 
@@ -156,7 +168,7 @@ const result = {
     if (!allExecutableMatch || !agree || !expectedHashMatch) good = false;
     const report = {
       name: net.name, chainId: net.chain, address: net.address, pinnedBlock: height,
-      status, agree, expectedHashMatch, observations
+      status, agree, expectedHashMatch, observations, providerErrors, preliminaryProviderAvailability: readings
     };
     result.deployments.push(report);
     console.log("DEPLOYMENT_SOURCE_MATCH " + JSON.stringify(report));
