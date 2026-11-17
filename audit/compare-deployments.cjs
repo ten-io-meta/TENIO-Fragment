@@ -150,7 +150,10 @@ const result = {
       allExact ? "FULL_BYTE_FOR_BYTE_MATCH" :
       allExecutableMatch ? "EXECUTABLE_CODE_MATCH_ONLY_METADATA_DIFFERS" :
       "COMPILED_RUNTIME_MISMATCH";
-    if (!allExact || !agree || !expectedHashMatch) good = false;
+    // For behavior/security analysis, Solidity's executable runtime is the
+    // binding criterion. Full metadata mismatch remains a recorded limitation:
+    // it is NOT evidence of exact source-file or compiler-input provenance.
+    if (!allExecutableMatch || !agree || !expectedHashMatch) good = false;
     const report = {
       name: net.name, chainId: net.chain, address: net.address, pinnedBlock: height,
       status, agree, expectedHashMatch, observations
@@ -162,12 +165,16 @@ const result = {
   const outDir = path.resolve(__dirname, "results");
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, "bytecode-compare.json"), JSON.stringify(result, null, 2) + "\n");
+  // Distinguish an independently reproduced EVM program from an exact
+  // metadata/source provenance match for downstream audits.
+  console.log("AUDIT_SCOPE executable runtime equality excludes compiler CBOR metadata; full source-file identity is NOT established");
 
   console.log("COMPILED_RUNTIME " + JSON.stringify(result.compiled));
   console.log("COMPILER_SETTINGS " + JSON.stringify(result.compiler));
   console.log("SOURCE_MATCH_SUMMARY " + JSON.stringify({
     comparisons: result.deployments.map(d => ({ chainId: d.chainId, status: d.status, agree: d.agree })),
-    exactMatchAll: good
+    executableMatchAll: good,
+    fullByteForByteAll: result.deployments.every(d => d.status === "FULL_BYTE_FOR_BYTE_MATCH")
   }));
   if (!good) process.exitCode = 1; // never claim verification when code differs.
 })().catch(e => {
