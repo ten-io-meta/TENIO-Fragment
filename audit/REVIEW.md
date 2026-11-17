@@ -22,6 +22,30 @@ With Cancun compilation, **the runtime executable code excluding compiler CBOR m
 
 The comparison script independently fetches `eth_getCode`, `eth_getBlockByNumber` and `eth_getBalance` from two chain-specific providers, pins one block, checks expected keccak hashes and reports **full code equality** separately from **executable-prefix equality**. The GitHub Action fails closed when executable-prefix equality or code/provenance agreement cannot be established.
 
+## Confirmed live-chain evidence — 17 November 2026
+
+**Exact-head CI:** [GitHub Actions 44193157613](https://github.com/ten-io-meta/TENIO-Fragment/actions/runs/44193157613) **SUCCESS**.
+Twenty Solidity source units compiled using `solc 0.8.28+commit.7893614a`, optimizer 200 runs, Cancun EVM.
+Five local security tests **PASS**.
+The executable runtime (5,599 bytes excluding 53 compiler metadata/footer bytes) matches both live deployments exactly.
+Full 5,652-byte runtime comparison still differs because compilation metadata differs.
+Two independent public nodes corroborated codehash and block hash at the same pinned block for each chain.
+
+Read-only token inventory: `audit/inventory-live-token-state.cjs`, current output saved to a GitHub Actions artifact (`token-inventory.json`). It calls `tokenIds()`, `ownerOf(id)` and `eth_getBalance` with no transactions:
+
+| Field | Mainnet (block 26,437,840) | Sepolia (block 12,157,442) |
+| --- | --- | --- |
+| Mint counter `tokenIds()` | **0** | **17** |
+| Live token IDs (full 1..counter scan) | **none** | **14, 15** |
+| Owners of live tokens | none | Both `0x75DA787FDA32092079dbe113c5c9DBC22CBBC455` |
+| Contract ETH | **0** | **0.54 test ETH** |
+| Hypothetical 0.10 ETH each for observed live NFTs | **0** | **0.20 test ETH** |
+| Difference between balance and hypothetical backing | **0** | **0.34 test ETH** |
+
+**Interpretation:** The studied Mainnet instance has no minted IDs or observed active NFT redemptions at the pinned block. Sepolia holds enough *test* ETH to pay 0.10 ETH to both existing token owners **at that snapshot**, but the owner can still drain all ETH at any time; this is not a protected balance. Balances and token states can change after the recorded blocks. The `0.34` difference is a **mathematical margin**, not protected withdrawal surplus nor proof of a trustless guarantee. The inventory uses one RPC for per-token ownerOf reads; the codehash and balance had independent dual-RPC corroboration in the runtime comparison.
+
+The historical implementation remains economically unsafe **as a promise of guaranteed burn redemption**, but the present evidence **does not demonstrate an outstanding Mainnet holder loss or a currently underfunded Sepolia token**. No transaction history audit or independent external security audit has been performed.
+
 ## Economic properties, specified vs observed
 
 **R1 — Payment soundness (strict ERC-8060 expectation)**
