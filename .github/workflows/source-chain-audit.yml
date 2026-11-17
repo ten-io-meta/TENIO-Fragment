@@ -1,0 +1,36 @@
+name: TENIO Fragment source-to-chain and economic safety audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-and-economics:
+    name: Recompile, compare deployed bytecode and run adversarial tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Compile historical Solidity source using isolated config without keys
+        run: npx hardhat compile --config audit/hardhat.audit.config.cjs
+      - name: Prove economic counterexamples on local Hardhat only
+        run: npx hardhat test --config audit/hardhat.audit.config.cjs
+      - name: Compare compiled runtime byte-for-byte with Mainnet and Sepolia
+        run: node audit/compare-deployments.cjs
+      - name: Upload complete source-to-chain evidence even on mismatch
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenio-fragment-runtime-safety-evidence
+          path: |
+            audit/results/*.json
+          if-no-files-found: warn
