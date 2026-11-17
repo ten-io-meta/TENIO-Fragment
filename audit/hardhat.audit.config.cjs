@@ -6,7 +6,13 @@ require("@nomicfoundation/hardhat-toolbox");
 module.exports = {
   solidity: {
     version: "0.8.28",
-    settings: { optimizer: { enabled: false, runs: 200 } }
+    settings: {
+      optimizer: {
+        enabled: process.env.AUDIT_OPTIMIZER === "true",
+        runs: Number(process.env.AUDIT_RUNS || 200)
+      },
+      ...(process.env.AUDIT_EVM_VERSION ? { evmVersion: process.env.AUDIT_EVM_VERSION } : {})
+    }
   },
   paths: {
     root: path.resolve(__dirname, ".."),
