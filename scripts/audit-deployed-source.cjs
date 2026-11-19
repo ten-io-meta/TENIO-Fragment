@@ -73,7 +73,7 @@ function sha(s){return crypto.createHash("sha256").update(s).digest("hex");}
  const compiled=[];
  for(const optimizer of [false,true]){
   for(const viaIR of [false,true]){
-   for(const evmVersion of [null,"paris","shanghai","cancun"]){
+   for(const evmVersion of [null]){
     for(const metadata of ["ipfs","none"]){
      const id={optimizer,viaIR,evmVersion:evmVersion||"compiler-default",metadata};
      try{
