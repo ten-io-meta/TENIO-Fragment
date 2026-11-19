@@ -1,0 +1,32 @@
+name: TENIO Fragment deployed-source comparison (read-only)
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-bytecode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install pinned project dependencies
+        run: npm ci
+      - name: Install exact solc 0.8.28 without changing repository manifests
+        run: npm install --no-save --ignore-scripts --package-lock=false solc@0.8.28
+      - name: Compare actual deployment runtime against compiled published source
+        run: node scripts/audit-deployed-source.cjs
+      - name: Upload all matching and nonmatching evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenio-fragment-source-runtime-evidence
+          path: audit-results/source-runtime-comparison.json
+          if-no-files-found: warn
